@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 import os
 from multiprocessing import Pool, cpu_count
 
-# Crear carpeta principal para las imágenes
+# Crear carpeta principal para las imágenes y archivos .dat
 carpeta_principal = "variacion_periodicidad"
 os.makedirs(carpeta_principal, exist_ok=True)
 
 # Rango de periodicidades
-periodicidades = range(30, 201)  # de 30 a 200 minutos
+periodicidades = range(10, 721)  # de 30 a 200 minutos
 
 # Función para procesar la serie de tiempo (sin columna de error)
 def procesar_serie(archivo):
@@ -38,21 +38,37 @@ def calcular_phasefold(data, periodicidad):
 def ajustar_fase_centrada_en_0(phase, periodicidad):
     return (phase - 0.5) * periodicidad
 
-# Función para graficar el phase folding de múltiples archivos en una sola gráfica
-def graficar_phasefolding_multiple(periodicidad, phase_foldings):
+# Función para graficar el phase folding de múltiples archivos en una sola gráfica y guardar los datos en .dat
+def graficar_y_guardar_datos(periodicidad, phase_foldings):
+    # Crear gráfica
     plt.figure(figsize=(10, 6))
+    fases_total = []
+    flujos_total = []
+
     for phase, folded_flux in phase_foldings:
         phase_centrada = ajustar_fase_centrada_en_0(phase, periodicidad)
         plt.scatter(phase_centrada, folded_flux, s=1, alpha=0.5)
+        
+        # Almacenar datos en listas
+        fases_total.extend(phase_centrada)
+        flujos_total.extend(folded_flux)
 
+    # Configuración de la gráfica
     plt.xlabel("Fase (minutos)")
     plt.ylabel("Flujo normalizado")
     plt.title(f"Phase Folding para Periodicidad = {periodicidad} minutos")
     plt.axvline(0, color='red', linestyle='--')
     plt.xlim(-periodicidad / 2, periodicidad / 2)
     plt.tight_layout()
+    
+    # Guardar imagen
     plt.savefig(os.path.join(carpeta_principal, f"phasefolding_periodicidad_{periodicidad}.png"))
     plt.close()
+
+    # Guardar datos en archivo .dat
+    archivo_dat = os.path.join(carpeta_principal, f"phasefolding_periodicidad_{periodicidad}.dat")
+    datos_df = pd.DataFrame({"Fase": fases_total, "Flujo_normalizado": flujos_total})
+    datos_df.to_csv(archivo_dat, sep='\t', index=False, header=True)
 
 # Leer la lista de archivos desde 'lista.txt'
 lista_archivos = 'filtrado_periodicidades_95.42_robper.txt'
@@ -70,13 +86,13 @@ with Pool(cpu_count()) as pool:
 # Filtrar archivos que no se procesaron correctamente
 datos_procesados = [data for data in datos_procesados if data is not None]
 
-# Loop para cada periodicidad y graficar cada set de datos en una gráfica
+# Loop para cada periodicidad y graficar cada set de datos en una gráfica y archivo .dat
 for periodicidad in periodicidades:
     # Calcular el phase folding para cada archivo con la periodicidad actual
     phase_foldings = [calcular_phasefold(data, periodicidad) for data in datos_procesados]
     
-    # Graficar todos los phase foldings en una sola gráfica para la periodicidad actual
-    graficar_phasefolding_multiple(periodicidad, phase_foldings)
+    # Graficar y guardar phase foldings en una gráfica y archivo .dat para la periodicidad actual
+    graficar_y_guardar_datos(periodicidad, phase_foldings)
 
-print("Phasefolding completado y gráficos guardados en 'variacion_periodicidad'.")
+print("Phasefolding completado. Gráficos e archivos .dat guardados en 'variacion_periodicidad'.")
 

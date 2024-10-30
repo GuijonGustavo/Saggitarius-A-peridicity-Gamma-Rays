@@ -4,14 +4,14 @@ from matplotlib.animation import FuncAnimation
 
 # Configuración de parámetros
 periodos = [48, 32, 96]  # En minutos
-frecuencias = [1/p for p in periodos]  # Frecuencia inversa del periodo
+frecuencias = [1 / p for p in periodos]  # Frecuencia inversa del periodo
 tiempo_total = 500  # Minutos
-fps = 1000  # Cuadros por segundo
+fps = 10000  # Cuadros por segundo
 interval = 1000 / fps  # Intervalo entre cuadros en milisegundos
 
-# Definir el tiempo y las señales de oscilación
+# Definir el tiempo y las señales de oscilación con desfase de pi/2
 t = np.linspace(0, tiempo_total, int(fps * tiempo_total / 60))
-oscilaciones = [np.sin(2 * np.pi * f * t) for f in frecuencias]
+oscilaciones = [np.sin(2 * np.pi * f * t + np.pi / 2) for f in frecuencias]  # Desfase de pi/2
 
 # Coordenadas para órbitas circulares
 radio = 1.0  # Radio de la órbita
@@ -71,8 +71,8 @@ def update(frame):
 
     # Actualizar posiciones en la órbita inclinada
     for i, punto in enumerate(puntos_orbitas_inclinadas):
-        # Ángulo en la órbita para cada objeto, basado en su periodo
-        theta = 2 * np.pi * (t[frame] / periodos[i])
+        # Ángulo en la órbita para cada objeto, basado en su periodo, con desfase de pi/2
+        theta = 2 * np.pi * (t[frame] / periodos[i]) + np.pi / 2
         x = radio * np.cos(theta)
         y = radio * np.sin(theta)
 
@@ -83,8 +83,8 @@ def update(frame):
 
     # Actualizar posiciones en la vista desde arriba (circular)
     for i, punto in enumerate(puntos_orbitas_arriba):
-        # Ángulo en la órbita para cada objeto, basado en su periodo
-        theta = 2 * np.pi * (t[frame] / periodos[i])
+        # Ángulo en la órbita para cada objeto, basado en su periodo, con desfase de pi/2
+        theta = 2 * np.pi * (t[frame] / periodos[i]) + np.pi / 2
         x = radio * np.cos(theta)
         y = radio * np.sin(theta)
         punto.set_data(x, y)

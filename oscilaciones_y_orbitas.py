@@ -6,7 +6,7 @@ from matplotlib.animation import FuncAnimation
 periodos = [48, 32, 96]  # En minutos
 frecuencias = [1 / p for p in periodos]  # Frecuencia inversa del periodo
 tiempo_total = 500  # Minutos
-fps = 10000  # Cuadros por segundo
+fps = 3000  # Cuadros por segundo
 interval = 1000 / fps  # Intervalo entre cuadros en milisegundos
 
 # Definir el tiempo y las señales de oscilación con desfase de pi/2
